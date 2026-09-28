@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/style.css?v=lovable1">
 </head>
 <body>
   <!-- Lightpaper Creations Background Watermark -->
@@ -105,17 +105,17 @@
         </div>
       </div>
 
-      <!-- Production Quick Actions Bar -->
-      <div class="glass-panel hud-card" style="padding: 16px 22px; margin-bottom: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-          <div style="font-family: var(--font-display); font-weight: 800; font-size: 14px; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+      <!-- Production Quick Actions Bar (Lovable Command Dock) -->
+      <div class="glass-panel hud-card" style="padding: 16px 24px; margin-bottom: 24px; border-top: 2px solid rgba(99, 102, 241, 0.5);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+          <div style="font-family: var(--font-display); font-weight: 800; font-size: 13.5px; color: #f8fafc; display: flex; align-items: center; gap: 10px; letter-spacing: -0.01em;">
             <span class="pulse-cyan-dot"></span> Quick Command Console:
           </div>
           <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <button class="btn btn-primary" onclick="openCheckoutModal()">🚚 Check-Out Gear</button>
             <button class="btn btn-accent" onclick="openBriefModal()">🎬 Plan New Shoot</button>
-            <button class="btn btn-outline" style="color: #4ade80; border-color: rgba(34, 197, 94, 0.4); background: rgba(34, 197, 94, 0.08);" onclick="openExpenseModal()">💰 Log Expense & Bill</button>
-            <button class="btn btn-outline" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.08);" onclick="openAddItemModal()">🎥 Add Gear Item</button>
+            <button class="btn btn-outline" style="color: #34d399; border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.08);" onclick="openExpenseModal()">💰 Log Expense & Bill</button>
+            <button class="btn btn-outline" style="color: #818cf8; border-color: rgba(99, 102, 241, 0.35); background: rgba(99, 102, 241, 0.08);" onclick="openAddItemModal()">🎥 Add Gear Item</button>
             <button class="btn btn-outline" onclick="openImportModal()">📁 Import Gear CSV</button>
           </div>
         </div>
@@ -123,60 +123,60 @@
 
       <!-- LIVE ON-SET SHOOT MONITOR (REALTIME FROM MOBILE APP) -->
       <div class="glass-panel hud-card" style="border-top: 3px solid #f59e0b; margin-bottom: 24px;">
-        <div class="panel-header" style="flex-wrap: wrap; gap: 10px;">
+        <div class="panel-header" style="flex-wrap: wrap; gap: 12px;">
           <div style="display: flex; align-items: center; gap: 10px;">
             <span class="hud-indicator pulse-amber"></span>
             <div class="panel-title">🎬 LIVE ON-SET SHOOT MONITOR & CREW STREAM</div>
             <span class="badge badge-in-use" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);">🔴 Real-time Mobile Sync</span>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
-            <select id="desktop-live-shoot-select" class="form-input" style="width: auto; padding: 6px 12px; font-size: 12px; background: #0f172a;" onchange="loadDesktopLiveShoot(this.value)">
+            <select id="desktop-live-shoot-select" class="form-input" style="width: auto; padding: 7px 14px; font-size: 12.5px; background: rgba(11, 16, 28, 0.9);" onchange="loadDesktopLiveShoot(this.value)">
               <option value="">Loading active shoots...</option>
             </select>
-            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 12px;" onclick="refreshDesktopLiveTracker()">🔄 Refresh Stream</button>
-            <a href="/mobile" target="_blank" class="btn btn-accent" style="padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">📱 Open Phone App ↗</a>
+            <button class="btn btn-outline" style="padding: 7px 14px; font-size: 12px;" onclick="refreshDesktopLiveTracker()">🔄 Refresh Stream</button>
+            <a href="/mobile" target="_blank" class="btn btn-accent" style="padding: 7px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">📱 Open Phone App ↗</a>
           </div>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 8px;">
           
           <!-- Box 1: Shoot Mission & Live Milestones -->
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 14px;">
-            <div style="font-weight: 700; font-size: 13px; color: #f8fafc; margin-bottom: 6px; display: flex; justify-content: space-between;">
+          <div class="stream-box">
+            <div style="font-weight: 800; font-size: 13.5px; color: #f8fafc; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
               <span id="desk-live-shoot-name">Mission: --</span>
-              <span id="desk-live-call-time" style="color: #f59e0b;">Call Time: --</span>
+              <span id="desk-live-call-time" style="color: #f59e0b; font-size: 12px;">Call Time: --</span>
             </div>
-            <div style="font-size: 12px; color: #94a3b8; margin-bottom: 12px;" id="desk-live-location">📍 Location: --</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-bottom: 14px;" id="desk-live-location">📍 Location: --</div>
             
-            <div style="font-size: 11px; font-weight: 700; color: #cbd5e1; text-transform: uppercase; margin-bottom: 8px;">Live Set Milestones</div>
+            <div style="font-size: 10.5px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">Live Set Milestones</div>
             <div id="desk-live-milestones-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
               <!-- Milestones filled by JS -->
             </div>
           </div>
 
           <!-- Box 2: Latest Clapperboard Takes Logged from Mobile -->
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 14px;">
-            <div style="font-weight: 700; font-size: 13px; color: #f8fafc; margin-bottom: 8px; display: flex; justify-content: space-between;">
-              <span>🎬 Live Clapper Takes (<span id="desk-live-takes-count">0</span>)</span>
-              <span style="font-size: 11px; color: #38bdf8;">Verified by Crew</span>
+          <div class="stream-box">
+            <div style="font-weight: 800; font-size: 13.5px; color: #f8fafc; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+              <span>🎬 Live Clapper Takes (<span id="desk-live-takes-count" style="color: #38bdf8;">0</span>)</span>
+              <span style="font-size: 10.5px; color: #34d399; font-weight: 700; background: rgba(16, 185, 129, 0.12); padding: 2px 8px; border-radius: 9999px; border: 1px solid rgba(16, 185, 129, 0.25);">✓ Verified by Crew</span>
             </div>
-            <div id="desk-live-takes-stream" style="max-height: 170px; overflow-y: auto; font-size: 12px;">
-              <div style="text-align: center; color: #64748b; padding: 20px;">No takes logged on set yet today.</div>
+            <div id="desk-live-takes-stream" style="max-height: 180px; overflow-y: auto; font-size: 12.5px;">
+              <div style="text-align: center; color: #64748b; padding: 24px;">No takes logged on set yet today.</div>
             </div>
           </div>
 
           <!-- Box 3: Gear On-Set Verification & Live Crew Stream -->
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 14px;">
-            <div style="font-weight: 700; font-size: 13px; color: #f8fafc; margin-bottom: 8px; display: flex; justify-content: space-between;">
+          <div class="stream-box">
+            <div style="font-weight: 800; font-size: 13.5px; color: #f8fafc; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
               <span>📦 Gear Verification Status</span>
-              <span id="desk-live-gear-ratio" style="color: #22c55e; font-weight: bold;">0 / 0 Verified</span>
+              <span id="desk-live-gear-ratio" style="color: #34d399; font-weight: 800; font-family: var(--font-mono); font-size: 12px;">0 / 0 Verified</span>
             </div>
-            <div style="display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap;" id="desk-live-gear-bars">
+            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;" id="desk-live-gear-bars">
               <!-- Gear summary pills -->
             </div>
-            <div style="font-size: 11px; font-weight: 700; color: #cbd5e1; text-transform: uppercase; margin-bottom: 4px;">Recent Crew Actions Stream</div>
-            <div id="desk-live-activity-stream" style="max-height: 110px; overflow-y: auto; font-size: 11px;">
-              <div style="text-align: center; color: #64748b; padding: 10px;">Awaiting live crew activity...</div>
+            <div style="font-size: 10.5px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">Recent Crew Actions Stream</div>
+            <div id="desk-live-activity-stream" style="max-height: 120px; overflow-y: auto; font-size: 11.5px;">
+              <div style="text-align: center; color: #64748b; padding: 12px;">Awaiting live crew activity...</div>
             </div>
           </div>
 
