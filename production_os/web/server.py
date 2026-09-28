@@ -182,14 +182,10 @@ class QuickDPRRequest(BaseModel):
 # Main Web App UI Root & Mobile App Routes
 # ----------------------------------------------------
 @app.get("/", response_class=HTMLResponse)
-async def serve_index():
-    index_file = os.path.join(static_dir, "index.html")
-    with open(index_file, "r", encoding="utf-8") as f:
-        return HTMLResponse(content=f.read())
-
 @app.get("/mobile", response_class=HTMLResponse)
 @app.get("/app", response_class=HTMLResponse)
-async def serve_mobile():
+async def serve_mobile_shoot_tracker():
+    """Serves the Mobile Shoot Tracker app as the primary interface."""
     mobile_file = os.path.join(static_dir, "mobile.html")
     if os.path.exists(mobile_file):
         with open(mobile_file, "r", encoding="utf-8") as f:
@@ -197,6 +193,14 @@ async def serve_mobile():
     index_file = os.path.join(static_dir, "index.html")
     with open(index_file, "r", encoding="utf-8") as f:
         return HTMLResponse(content=f.read(), headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
+
+@app.get("/desktop", response_class=HTMLResponse)
+@app.get("/admin", response_class=HTMLResponse)
+async def serve_desktop_dashboard():
+    """Serves the desktop Production Manager command dashboard."""
+    index_file = os.path.join(static_dir, "index.html")
+    with open(index_file, "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
 
 @app.get("/sw.js")
 async def serve_sw():
