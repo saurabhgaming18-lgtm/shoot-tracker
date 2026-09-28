@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Shoot Tracker • Production OS</title>
+  <meta name="description" content="Live on-set shoot tracker and clapperboard logger for production crew.">
+  <meta name="theme-color" content="#090d16">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ShootTracker">
+  <link rel="apple-touch-icon" href="/static/app_icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/static/mobile.css?v=3">
+  <!-- Service Worker Registration (enables Android install prompt + offline) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
+          .then(reg => console.log('SW registered:', reg.scope))
+          .catch(err => console.warn('SW registration failed:', err));
+      });
+    }
+    // Capture Android "Add to Home Screen" install prompt
+    let deferredInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      const btn = document.getElementById('btn-install-app');
+      if (btn) btn.style.display = 'flex';
+    });
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      const btn = document.getElementById('btn-install-app');
+      if (btn) btn.style.display = 'none';
+    });
+    function triggerInstall() {
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.then(() => { deferredInstallPrompt = null; });
+      } else {
+        // iOS instructions
+        alert('To install on iPhone:\n1. Tap the Share button (box with arrow) at the bottom of Safari\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" — done! The app icon will appear on your home screen.');
+      }
+    }
+  </script>
+</head>
+<body>
+
+  <!-- App Root Container -->
+  <div id="app-root">
+
+    <!-- Top App Header -->
+    <header class="mobile-header">
+      <div class="header-brand">
+        <div class="brand-icon">🎬</div>
+        <div class="brand-titles">
+          <h1>Shoot Tracker</h1>
+          <p id="header-crew-role">Production Crew</p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 6px; align-items: center;">
+        <!-- Install App Button (shown automatically on Android; tappable on iPhone) -->
+        <button id="btn-install-app" class="header-user-btn" title="Install App on Phone" onclick="triggerInstall()" style="padding: 6px 10px; display: none; background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(234,179,8,0.1)); border-color: rgba(245,158,11,0.4);">
+          <span>📲 Install</span>
+        </button>
+        <button id="btn-share-qr" class="header-user-btn" title="Phone Connect QR Code" style="padding: 6px 10px;">
+          <span>📱 QR</span>
+        </button>
+        <button id="btn-user-profile" class="header-user-btn">
+          <span class="user-avatar-dot"></span>
+          <span id="user-display-name">Crew</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Global Shoot Selector -->
+    <div style="padding: 12px 16px 0;">
+      <div class="shoot-selector-bar">
+        <div style="flex: 1;">
+          <div class="shoot-select-label">Active Shoot Project</div>
+          <select id="active-shoot-select" class="shoot-dropdown">
+            <option value="">Loading active shoots...</option>
+          </select>
+        </div>
+        <button id="btn-refresh-data" class="header-user-btn" style="margin-top: 18px; padding: 8px 10px;">
+          🔄
+        </button>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         TAB 1: TODAY (DASHBOARD, CALL SHEET, MILESTONES & ACTIVITY)
+         ==================================================================== -->
+    <main id="tab-dashboard" class="tab-screen active">
+      
+      <!-- Active Shoot Status Hero Card -->
+      <div class="card" style="border-top: 3px solid var(--color-gold);">
+        <div class="card-header">
+          <div class="card-title">
+            <span id="hero-shoot-title">Shoot Overview</span>
+          </div>
+          <span id="hero-shoot-status" class="badge badge-active">Active</span>
+        </div>
+        
+        <div class="info-row">
+          <span class="info-label">📅 Shoot Date</span>
+          <span id="hero-shoot-date" class="info-val">--</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">⏰ Call Time</span>
+          <span id="hero-call-time" class="info-val" style="color: var(--color-gold);">--</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">🏢 Client / Contact</span>
+          <span id="hero-client" class="info-val">--</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">📍 Location</span>
+          <span id="hero-location" class="info-val">--</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">👥 Key Crew</span>
+          <span id="hero-crew" class="info-val" style="font-size: 12px;">--</span>
+        </div>
+
+        <div class="action-btn-group">
+          <a id="btn-open-maps" href="#" target="_blank" class="btn-action gold">
+            <span>🗺️ Open in Google Maps</span>
+          </a>
+          <a id="btn-call-contact" href="#" class="btn-action">
+            <span>📞 Call Client</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Live Shoot Milestones Tracker -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">⚡ Live Shoot Milestones</div>
+          <span class="badge badge-gold">On-Set Realtime</span>
+        </div>
+        <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">Tap button to stamp current time & log to production:</p>
+        
+        <div class="milestones-grid">
+          <button class="milestone-btn" data-milestone="reached_office">
+            <span class="milestone-icon">🏢</span>
+            <span class="milestone-label">Reached Office</span>
+            <span class="milestone-time"></span>
+          </button>
+          <button class="milestone-btn" data-milestone="call_checkin">
+            <span class="milestone-icon">📍</span>
+            <span class="milestone-label">Reached Set</span>
+            <span class="milestone-time"></span>
+          </button>
+          <button class="milestone-btn" data-milestone="setup_complete">
+            <span class="milestone-icon">⚡</span>
+            <span class="milestone-label">Camera Ready</span>
+            <span class="milestone-time"></span>
+          </button>
+          <button class="milestone-btn" data-milestone="waiting">
+            <span class="milestone-icon">⏳</span>
+            <span class="milestone-label">Waiting / Standby</span>
+            <span class="milestone-time"></span>
+          </button>
+          <button class="milestone-btn" data-milestone="first_shot">
+            <span class="milestone-icon">🎬</span>
+            <span class="milestone-label">1st Shot Rolled</span>
+            <span class="milestone-time"></span>
+          </button>
+          <button class="milestone-btn" data-milestone="lunch_call">
+            <span class="milestone-icon">🍱</span>
+            <span class="milestone-label">Lunch Call</span>
+            <span class="milestone-time"></span>
+          </button>
+          <button class="milestone-btn" data-milestone="lunch_resume">
+            <span class="milestone-icon">🔄</span>
+            <span class="milestone-label">Post-Lunch</span>
+            <span class="milestone-time"></span>
+          </button>
+          <button class="milestone-btn" data-milestone="wrap_call">
+            <span class="milestone-icon">🎉</span>
+            <span class="milestone-label">Final Wrap</span>
+            <span class="milestone-time"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Activity Stream -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📡 Live Crew Activity Feed</div>
+          <span id="activity-counter" class="badge badge-blue">Live</span>
+        </div>
+        <div id="activity-feed-list">
+          <div style="text-align: center; color: var(--text-muted); padding: 12px; font-size: 12px;">
+            No live activities yet today.
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+
+    <!-- ====================================================================
+         TAB 2: VERIFICATION (CLAPPERBOARD SHOT & TAKE LOGGER)
+         ==================================================================== -->
+    <main id="tab-shots" class="tab-screen">
+      
+      <!-- Clapperboard Interface -->
+      <div class="clapper-box">
+        <div class="clapper-stripes"></div>
+        
+        <div class="clapper-counter-grid">
+          <!-- Scene -->
+          <div class="counter-col">
+            <div class="counter-label">Scene</div>
+            <div id="disp-scene" class="counter-val">1</div>
+            <div class="counter-btns">
+              <button class="btn-counter-step" id="btn-scene-minus">-</button>
+              <button class="btn-counter-step" id="btn-scene-plus">+</button>
+            </div>
+          </div>
+          <!-- Shot -->
+          <div class="counter-col">
+            <div class="counter-label">Shot</div>
+            <div id="disp-shot" class="counter-val">1</div>
+            <div class="counter-btns">
+              <button class="btn-counter-step" id="btn-shot-minus">-</button>
+              <button class="btn-counter-step" id="btn-shot-plus">+</button>
+            </div>
+          </div>
+          <!-- Take -->
+          <div class="counter-col">
+            <div class="counter-label">Take</div>
+            <div id="disp-take" class="counter-val">1</div>
+            <div class="counter-btns">
+              <button class="btn-counter-step" id="btn-take-minus">-</button>
+              <button class="btn-counter-step" id="btn-take-plus">+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Take Evaluation (Good / NG) -->
+        <div class="take-decision-row">
+          <button id="toggle-good-take" class="take-toggle-btn good selected">
+            <span>⭐ GOOD TAKE</span>
+          </button>
+          <button id="toggle-ng-take" class="take-toggle-btn ng">
+            <span>❌ NG TAKE</span>
+          </button>
+        </div>
+
+        <input type="text" id="input-shot-notes" class="input-field" placeholder="Director / DOP Notes (e.g. Master wide, lens 35mm, talent flub)">
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+          <input type="text" id="input-camera-roll" class="input-field" style="margin-bottom: 0;" placeholder="Cam Roll: A001" value="A001">
+          <input type="text" id="input-sound-roll" class="input-field" style="margin-bottom: 0;" placeholder="Sound Roll: S001" value="S001">
+        </div>
+
+        <button id="btn-submit-take" class="btn-log-take">
+          🎬 LOG TAKE & VERIFY
+        </button>
+      </div>
+
+      <!-- Recent Logged Shots List -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📋 Today's Shot Logs (<span id="shots-total-count">0</span>)</div>
+          <span class="badge badge-gold">Clapper Stream</span>
+        </div>
+        
+        <div id="shots-history-list">
+          <div style="text-align: center; color: var(--text-muted); padding: 16px; font-size: 12px;">
+            No takes logged for this shoot yet. Tap "Log Take & Verify" above!
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+
+    <!-- ====================================================================
+         TAB 3: GEAR VERIFICATION
+         ==================================================================== -->
+    <main id="tab-gear" class="tab-screen">
+      
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📦 Gear Verification & Checklist</div>
+          <span id="gear-count-badge" class="badge badge-blue">0 Items</span>
+        </div>
+        <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;">
+          Verify equipment packed at vault, checked on set, and returned:
+        </p>
+
+        <div id="gear-checklist-container">
+          <div style="text-align: center; color: var(--text-muted); padding: 16px; font-size: 12px;">
+            No equipment manifest specified for this shoot.
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+
+    <!-- ====================================================================
+         BOTTOM NAVIGATION BAR (3 CLEAN TABS)
+         ==================================================================== -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-tab="tab-dashboard">
+        <span class="nav-icon">🏠</span>
+        <span>Today</span>
+      </button>
+      <button class="nav-item" data-tab="tab-shots">
+        <span class="nav-icon">🎬</span>
+        <span>Verification</span>
+      </button>
+      <button class="nav-item" data-tab="tab-gear">
+        <span class="nav-icon">📦</span>
+        <span>Gear Verification</span>
+      </button>
+    </nav>
+
+
+    <!-- ====================================================================
+         CLEAN NORMAL LOGIN SCREEN OVERLAY
+         ==================================================================== -->
+    <div id="auth-modal" class="auth-overlay">
+      <div class="auth-brand">
+        <div class="auth-logo-circle">🎬</div>
+        <h2 class="auth-title">Shoot Tracker Login</h2>
+        <p class="auth-sub">Enter your username and password to start tracking</p>
+      </div>
+
+      <!-- Standard Clean Login Form -->
+      <form id="login-form">
+        <div style="margin-bottom: 12px;">
+          <label style="font-size: 12px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Username</label>
+          <input type="text" id="login-username" class="input-field" placeholder="Enter username" required style="margin-top: 6px; padding: 12px; font-size: 14px;">
+        </div>
+
+        <div style="margin-bottom: 18px;">
+          <label style="font-size: 12px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Password</label>
+          <input type="password" id="login-password" class="input-field" placeholder="Enter password" required style="margin-top: 6px; padding: 12px; font-size: 14px;">
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;">
+          <label style="font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="checkbox" id="remember-me" checked style="accent-color: var(--color-gold);">
+            <span>Remember Me</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn-log-take" style="margin-bottom: 12px; padding: 15px; font-size: 15px;">
+          🔐 Sign In to Shoot Tracker
+        </button>
+      </form>
+    </div>
+
+
+    <!-- ====================================================================
+         PHONE QR CODE / NETWORK SHARE MODAL
+         ==================================================================== -->
+    <div id="qr-modal" class="modal-backdrop hidden">
+      <div class="modal-sheet">
+        <div class="card-header">
+          <div class="card-title">📱 Open App on Your Phone</div>
+          <button id="btn-close-qr" class="header-user-btn">✕ Close</button>
+        </div>
+        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 14px;">
+          Scan with your phone camera or copy the link to open in your browser:
+        </p>
+
+        <div style="text-align: center; margin: 12px 0;">
+          <div id="qr-code-box" style="display: inline-block; background: #fff; padding: 12px; border-radius: 12px;">
+            <img id="qr-image" src="" alt="Mobile URL QR Code" style="width: 180px; height: 180px; display: block;">
+          </div>
+        </div>
+
+        <div style="background: var(--bg-card); padding: 10px; border-radius: 8px; font-family: monospace; font-size: 13px; color: var(--color-gold); text-align: center; margin-bottom: 12px; word-break: break-all;" id="network-mobile-url">
+          Loading network URL...
+        </div>
+
+        <button id="btn-copy-url" class="btn-action" style="width: 100%; justify-content: center;">
+          📋 Copy Link
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/static/mobile.js?v=3"></script>
+</body>
+</html>

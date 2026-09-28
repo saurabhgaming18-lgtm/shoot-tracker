@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saurabh Patil • Production Manager OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Lightpaper Creations Background Watermark -->
+  <div class="bg-brand-watermark" aria-hidden="true">
+    <img src="/static/logo_white.png" alt="Lightpaper Creations">
+  </div>
+
+  <!-- Top Header with Symmetrical HUD Timecode -->
+  <header class="app-header">
+    <div class="brand">
+      <img src="/static/logo_white.png" alt="Lightpaper Creations" class="header-logo">
+      <div>
+        <div class="brand-title">LIGHTPAPER CREATIONS • PRODUCTION OS</div>
+        <div class="brand-sub">Saurabh Patil • Studio Management & Dispatch Terminal</div>
+      </div>
+    </div>
+
+    <!-- Center Symmetrical Live Timecode Display -->
+    <div class="header-timecode-hub">
+      <div class="timecode-display">
+        <span class="timecode-label">LIVE TIMECODE</span>
+        <span id="live-studio-timecode" class="timecode-digits">00:00:00:00</span>
+      </div>
+      <div class="timecode-status">
+        <span class="pulse-dot"></span> 24 FPS • SYNC LOCKED
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <span id="live-date-badge" class="badge badge-approved" style="font-size: 12px; padding: 6px 14px;">📅 Active Tracking</span>
+      <a href="/api/download_excel" class="btn btn-primary" id="btn-download-excel">
+        📥 Master Excel (.xlsx)
+      </a>
+    </div>
+  </header>
+
+  <!-- Navigation Bar -->
+  <nav class="nav-bar">
+    <button class="nav-tab active" data-tab="dashboard">📊 Dashboard</button>
+    <button class="nav-tab" data-tab="dispatch">📦 Equipment In / Out</button>
+    <button class="nav-tab" data-tab="inventory">🎥 Gear Inventory</button>
+    <button class="nav-tab" data-tab="briefs">🎯 Shoot Tracker</button>
+    <button class="nav-tab" data-tab="expenses">💰 Petty Cash & Budget</button>
+    <button class="nav-tab" data-tab="ai-assistant">🤖 AI Production Assistant</button>
+  </nav>
+
+  <!-- Main Workspace -->
+  <main class="main-content">
+
+    <!-- ============================================== -->
+    <!-- 1. DASHBOARD OVERVIEW (SYMMETRIC & GEOMETRIC) -->
+    <!-- ============================================== -->
+    <section id="tab-dashboard" class="tab-pane active">
+      
+      <!-- Top Symmetrical Metric Cards (4-Grid Matrix) -->
+      <div class="stats-grid">
+        <div class="stat-card hud-card" style="--stat-accent: #22c55e;">
+          <div class="stat-header">
+            <span class="stat-label">Available Gear</span>
+            <span class="stat-icon">🟢</span>
+          </div>
+          <div class="stat-value" id="stat-available">0</div>
+          <div class="stat-sub">In Vault / Storage</div>
+          <div class="stat-progress-track"><div class="stat-progress-bar" style="width: 100%; background: #22c55e;"></div></div>
+        </div>
+
+        <div class="stat-card hud-card" style="--stat-accent: #eab308;">
+          <div class="stat-header">
+            <span class="stat-label">Gear On Field (In Use)</span>
+            <span class="stat-icon">🟡</span>
+          </div>
+          <div class="stat-value" id="stat-in-use">0</div>
+          <div class="stat-sub">Checked Out to Shoots</div>
+          <div class="stat-progress-track"><div class="stat-progress-bar" style="width: 35%; background: #eab308;"></div></div>
+        </div>
+
+        <div class="stat-card hud-card" style="--stat-accent: #38bdf8;">
+          <div class="stat-header">
+            <span class="stat-label">Active Dispatches</span>
+            <span class="stat-icon">🚚</span>
+          </div>
+          <div class="stat-value" id="stat-active-shoots">0</div>
+          <div class="stat-sub">Active Out Shoots</div>
+          <div class="stat-progress-track"><div class="stat-progress-bar" style="width: 50%; background: #38bdf8;"></div></div>
+        </div>
+
+        <div class="stat-card hud-card" style="--stat-accent: #f59e0b;">
+          <div class="stat-header">
+            <span class="stat-label">Petty Cash Logged</span>
+            <span class="stat-icon">💰</span>
+          </div>
+          <div class="stat-value" id="stat-petty-cash">₹0.00</div>
+          <div class="stat-sub" id="stat-petty-sub">0 Receipts Attached</div>
+          <div class="stat-progress-track"><div class="stat-progress-bar" style="width: 20%; background: #f59e0b;"></div></div>
+        </div>
+      </div>
+
+      <!-- Production Quick Actions Bar -->
+      <div class="glass-panel hud-card" style="padding: 16px 22px; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div style="font-family: var(--font-display); font-weight: 800; font-size: 14px; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+            <span class="pulse-cyan-dot"></span> Quick Command Console:
+          </div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="openCheckoutModal()">🚚 Check-Out Gear</button>
+            <button class="btn btn-accent" onclick="openBriefModal()">🎬 Plan New Shoot</button>
+            <button class="btn btn-outline" style="color: #4ade80; border-color: rgba(34, 197, 94, 0.4); background: rgba(34, 197, 94, 0.08);" onclick="openExpenseModal()">💰 Log Expense & Bill</button>
+            <button class="btn btn-outline" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.08);" onclick="openAddItemModal()">🎥 Add Gear Item</button>
+            <button class="btn btn-outline" onclick="openImportModal()">📁 Import Gear CSV</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIVE ON-SET SHOOT MONITOR (REALTIME FROM MOBILE APP) -->
+      <div class="glass-panel hud-card" style="border-top: 3px solid #f59e0b; margin-bottom: 24px;">
+        <div class="panel-header" style="flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="hud-indicator pulse-amber"></span>
+            <div class="panel-title">🎬 LIVE ON-SET SHOOT MONITOR & CREW STREAM</div>
+            <span class="badge badge-in-use" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);">🔴 Real-time Mobile Sync</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <select id="desktop-live-shoot-select" class="form-input" style="width: auto; padding: 6px 12px; font-size: 12px; background: #0f172a;" onchange="loadDesktopLiveShoot(this.value)">
+              <option value="">Loading active shoots...</option>
+            </select>
+            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 12px;" onclick="refreshDesktopLiveTracker()">🔄 Refresh Stream</button>
+            <a href="/mobile" target="_blank" class="btn btn-accent" style="padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">📱 Open Phone App ↗</a>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 8px;">
+          
+          <!-- Box 1: Shoot Mission & Live Milestones -->
+          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 14px;">
+            <div style="font-weight: 700; font-size: 13px; color: #f8fafc; margin-bottom: 6px; display: flex; justify-content: space-between;">
+              <span id="desk-live-shoot-name">Mission: --</span>
+              <span id="desk-live-call-time" style="color: #f59e0b;">Call Time: --</span>
+            </div>
+            <div style="font-size: 12px; color: #94a3b8; margin-bottom: 12px;" id="desk-live-location">📍 Location: --</div>
+            
+            <div style="font-size: 11px; font-weight: 700; color: #cbd5e1; text-transform: uppercase; margin-bottom: 8px;">Live Set Milestones</div>
+            <div id="desk-live-milestones-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+              <!-- Milestones filled by JS -->
+            </div>
+          </div>
+
+          <!-- Box 2: Latest Clapperboard Takes Logged from Mobile -->
+          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 14px;">
+            <div style="font-weight: 700; font-size: 13px; color: #f8fafc; margin-bottom: 8px; display: flex; justify-content: space-between;">
+              <span>🎬 Live Clapper Takes (<span id="desk-live-takes-count">0</span>)</span>
+              <span style="font-size: 11px; color: #38bdf8;">Verified by Crew</span>
+            </div>
+            <div id="desk-live-takes-stream" style="max-height: 170px; overflow-y: auto; font-size: 12px;">
+              <div style="text-align: center; color: #64748b; padding: 20px;">No takes logged on set yet today.</div>
+            </div>
+          </div>
+
+          <!-- Box 3: Gear On-Set Verification & Live Crew Stream -->
+          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 14px;">
+            <div style="font-weight: 700; font-size: 13px; color: #f8fafc; margin-bottom: 8px; display: flex; justify-content: space-between;">
+              <span>📦 Gear Verification Status</span>
+              <span id="desk-live-gear-ratio" style="color: #22c55e; font-weight: bold;">0 / 0 Verified</span>
+            </div>
+            <div style="display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap;" id="desk-live-gear-bars">
+              <!-- Gear summary pills -->
+            </div>
+            <div style="font-size: 11px; font-weight: 700; color: #cbd5e1; text-transform: uppercase; margin-bottom: 4px;">Recent Crew Actions Stream</div>
+            <div id="desk-live-activity-stream" style="max-height: 110px; overflow-y: auto; font-size: 11px;">
+              <div style="text-align: center; color: #64748b; padding: 10px;">Awaiting live crew activity...</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Symmetrical Dual-Column Layout: Active Dispatches + Shoot Slate -->
+      <div class="dashboard-split-grid">
+        <!-- Left: Active Field Dispatches -->
+        <div class="glass-panel hud-card" style="margin-bottom: 0;">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span class="hud-indicator pulse-cyan"></span> 🚚 Active Dispatches (On Field)
+            </div>
+            <button class="btn btn-outline" onclick="switchTab('dispatch')">In/Out Log →</button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Dispatch Ref</th>
+                  <th>Project / Shoot</th>
+                  <th>Assigned Crew</th>
+                  <th>Time Out</th>
+                  <th>Expected Return</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="dashboard-active-dispatches-body">
+                <tr><td colspan="7" style="text-align:center; padding: 24px; color: #94a3b8;">No active dispatches. Click "🚚 Check-Out Gear" to deploy equipment.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right: Recent Shoot Production Slate -->
+        <div class="glass-panel hud-card" style="margin-bottom: 0;">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span class="hud-indicator pulse-amber"></span> 🎯 Active Shoot Mission
+            </div>
+            <button class="btn btn-outline" onclick="switchTab('briefs')">Shoot Tracker →</button>
+          </div>
+          <div id="dashboard-latest-brief">
+            <div style="color: #94a3b8; font-size: 13px; padding: 20px; text-align: center;">No shoots logged yet.</div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 2. EQUIPMENT IN / OUT LOG TAB -->
+    <!-- ============================================== -->
+    <section id="tab-dispatch" class="tab-pane">
+      <div class="glass-panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">📦 Equipment Dispatch & Return Log</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Track gear check-outs, crew assignments, return dates & condition inspections</div>
+          </div>
+          <button class="btn btn-primary" onclick="openCheckoutModal()">+ Check-Out Equipment (Dispatch)</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Dispatch ID</th>
+                <th>Date Out</th>
+                <th>Project / Shoot</th>
+                <th>Assigned Crew</th>
+                <th>Dispatched Items</th>
+                <th>Condition Out</th>
+                <th>Expected Return</th>
+                <th>Actual Return</th>
+                <th>Condition In</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="dispatch-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 3. GEAR INVENTORY TAB -->
+    <!-- ============================================== -->
+    <section id="tab-inventory" class="tab-pane">
+      <div class="glass-panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">🎥 Equipment Inventory & Asset Registry</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">
+              Manage your gear inventory. Add individual items or upload in bulk via CSV.
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-accent" onclick="openImportModal()">📁 Import Equipment List (CSV)</button>
+            <button class="btn btn-primary" onclick="openAddItemModal()">+ Add Gear Item</button>
+          </div>
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="chips-row" id="inventory-filter-chips">
+          <button class="chip-btn active" onclick="filterInventory('')">All Items</button>
+          <button class="chip-btn" onclick="filterInventory('Camera')">Cameras</button>
+          <button class="chip-btn" onclick="filterInventory('Lens')">Lenses</button>
+          <button class="chip-btn" onclick="filterInventory('Lighting')">Lighting</button>
+          <button class="chip-btn" onclick="filterInventory('Audio')">Audio</button>
+          <button class="chip-btn" onclick="filterInventory('Grip')">Grip & Tripods</button>
+          <button class="chip-btn" onclick="filterInventory('Monitoring')">Monitors</button>
+          <button class="chip-btn" onclick="filterInventory('Power')">Power & Batteries</button>
+          <button class="chip-btn" onclick="filterInventory('Media')">Media Cards</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Item ID</th>
+                <th>Category</th>
+                <th>Item Name</th>
+                <th>Brand & Model</th>
+                <th>Serial No</th>
+                <th>Vault Location</th>
+                <th>Qty</th>
+                <th>Status</th>
+                <th>Notes / Kit Info</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============================================== -->
+    <!-- 4. SHOOT TRACKER TAB -->
+    <!-- ============================================== -->
+    <section id="tab-briefs" class="tab-pane">
+      <div class="glass-panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">🎯 Shoot Tracker</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Track project names, clients & contact persons, deliverables, shoot dates, call times & locations</div>
+          </div>
+          <button class="btn btn-primary" onclick="openBriefModal()">+ Add New Shoot</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Shoot Ref</th>
+                <th>Project Name</th>
+                <th>Client & Contact Person</th>
+                <th>Deliverables</th>
+                <th>Shoot Date / End Date</th>
+                <th>Call Time</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>View & Download</th>
+              </tr>
+            </thead>
+            <tbody id="briefs-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 6. PETTY CASH & EXPENSES (WITH RECEIPT ATTACHER) TAB -->
+    <!-- ============================================== -->
+    <section id="tab-expenses" class="tab-pane">
+      <div class="glass-panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">💰 Production Petty Cash & Expense Desk (With Receipts)</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Log on-set costs and attach photo of bills or paste screenshots (`Ctrl+V`)</div>
+          </div>
+          <button class="btn btn-accent" onclick="openExpenseModal()">+ Add Expense & Attach Bill</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Expense ID</th>
+                <th>Date</th>
+                <th>Project</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Amount (INR)</th>
+                <th>Receipt / Screenshot</th>
+                <th>Paid By</th>
+                <th>Mode</th>
+                <th>Approval</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="expenses-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 7. AI PRODUCTION ASSISTANT TAB -->
+    <!-- ============================================== -->
+    <section id="tab-ai-assistant" class="tab-pane">
+      <div class="glass-panel" style="margin-bottom: 12px; padding: 16px 20px;">
+        <div style="font-size: 13px; color: #94a3b8;">
+          🤖 <strong>Saurabh Patil AI Production Desk:</strong> Type what you need to create, update, or add. The assistant will guide you step-by-step with interactive questions.
+        </div>
+        <div class="chips-row" style="margin-top: 10px;">
+          <button class="chip-btn" onclick="sendQuickPrompt('Add new gear')">"Add new gear"</button>
+          <button class="chip-btn" onclick="sendQuickPrompt('Check out equipment')">"Check out equipment"</button>
+          <button class="chip-btn" onclick="sendQuickPrompt('Create a call sheet')">"Create a call sheet"</button>
+          <button class="chip-btn" onclick="sendQuickPrompt('Log an expense')">"Log an expense"</button>
+          <button class="chip-btn" onclick="sendQuickPrompt('Show available gear')">"Show available gear"</button>
+          <button class="chip-btn" onclick="sendQuickPrompt('Show production overview')">"Show production overview"</button>
+        </div>
+      </div>
+
+      <div class="ai-hub-container">
+        <div class="chat-history" id="ai-chat-history">
+          <div class="chat-bubble chat-agent">
+            👋 Hello! I am your <strong>Production Manager AI Assistant (Saurabh Patil Desk)</strong>.<br><br>
+            Tell me what you'd like to do, and I'll ask you the necessary questions to add, update, or manage your production records:<br><br>
+            • 🎥 <strong>Add / Manage Gear</strong> in Inventory<br>
+            • 📦 <strong>Check Out & Dispatch</strong> gear to crew<br>
+            • 🎯 <strong>Create Shoot Call Sheets</strong> & Location Briefs<br>
+            • 💰 <strong>Log Petty Cash & Expenses</strong> with receipts<br>
+            • 📊 <strong>Check Production Overview & Master Excel</strong><br><br>
+            <em>What would you like to create, update, or add right now?</em>
+          </div>
+        </div>
+
+        <form class="chat-input-bar" id="ai-chat-form" onsubmit="handleChatSubmit(event)">
+          <input type="text" id="ai-chat-input" placeholder="Type a production command or instruction..." autocomplete="off">
+          <button type="submit" class="btn btn-primary">Send Command</button>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================== -->
+  <!-- MODAL: Check-Out Equipment -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="modal-checkout">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">📦 Check-Out Equipment (Dispatch)</div>
+        <button class="close-btn" onclick="closeModal('modal-checkout')">&times;</button>
+      </div>
+      <form onsubmit="submitCheckout(event)">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Project / Shoot Name *</label>
+            <input type="text" id="co-project" class="form-control" placeholder="Enter shoot / project name" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Assigned Crew Member *</span>
+              <span style="font-size: 11px; color: #38bdf8; font-weight: normal;">Click name to select</span>
+            </label>
+            <input type="text" id="co-crew" class="form-control" placeholder="Select team member below or type name" required oninput="renderCrewChips('co-crew-chips', 'co-crew')">
+            <div class="crew-chips-container" id="co-crew-chips"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Select Equipment to Dispatch * (Hold Ctrl / Cmd to multi-select)</label>
+          <select id="co-items" class="form-control" multiple style="height: 140px;" required>
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Expected Return Date *</label>
+            <input type="date" id="co-expected-return" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Condition at Check-Out</label>
+            <input type="text" id="co-condition" class="form-control" placeholder="Good / Tested">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Special Notes / Accessories Included</label>
+          <input type="text" id="co-notes" class="form-control" placeholder="Enter any specific notes or accessories">
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-checkout')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Dispatch Equipment & Update Sheet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: Check-In Equipment (Return) -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="modal-checkin">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">📥 Check-In Equipment (Return Inspection)</div>
+        <button class="close-btn" onclick="closeModal('modal-checkin')">&times;</button>
+      </div>
+      <form onsubmit="submitCheckin(event)">
+        <input type="hidden" id="ci-dispatch-id">
+        <div class="form-group">
+          <label class="form-label">Dispatch Reference</label>
+          <div id="ci-disp-info" style="font-weight: 700; color: #38bdf8; font-size: 14px; margin-bottom: 8px;"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Return Condition Status *</label>
+          <select id="ci-condition" class="form-control">
+            <option value="Good / Clean">Good / Clean (All items verified)</option>
+            <option value="Minor Wear / Dirty">Minor Wear / Needs Cleaning</option>
+            <option value="Damaged / Needs Maintenance">Damaged / Needs Maintenance</option>
+            <option value="Missing Items">Missing Items / Parts</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Damage / Missing Items Details (if any)</label>
+          <textarea id="ci-damaged-notes" class="form-control" rows="3" placeholder="Leave blank if all items returned clean in perfect working order"></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-checkin')">Cancel</button>
+          <button type="submit" class="btn btn-success">Confirm Return & Restock Inventory</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+
+  <!-- ============================================== -->
+  <!-- MODAL: Add Shoot to Shoot Tracker -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="modal-brief">
+    <div class="modal-content" style="max-width: 720px;">
+      <div class="modal-header">
+        <div class="modal-title">🎯 Add / Plan Shoot in Shoot Tracker</div>
+        <button class="close-btn" onclick="closeModal('modal-brief')">&times;</button>
+      </div>
+      <form onsubmit="submitBrief(event)">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Project Name *</label>
+            <input type="text" id="brf-project" class="form-control" placeholder="e.g. Eaton - Event Photography" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Client Name *</label>
+            <input type="text" id="brf-client" class="form-control" placeholder="e.g. Eaton India" required>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Client Contact Person & Phone</label>
+            <input type="text" id="brf-contact-person" class="form-control" placeholder="e.g. Eaton Contact Person / Phone">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Deliverables / Scope *</label>
+            <input type="text" id="brf-deliverables" class="form-control" placeholder="e.g. 50 Edited Photos + High-Res RAW Deliverables" required>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Shoot Date *</label>
+            <input type="text" id="brf-date" class="form-control" placeholder="e.g. 13th Aug 2026" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Shoot End Date</label>
+            <input type="text" id="brf-end-date" class="form-control" placeholder="e.g. 14th Aug 2026 (leave blank = same day)">
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Crew Call / Reach Time *</label>
+            <input type="text" id="brf-call" class="form-control" placeholder="e.g. 08:30 AM" required>
+          </div>
+          <div class="form-group">
+            <!-- spacer -->
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Shoot Location *</label>
+            <input type="text" id="brf-location" class="form-control" placeholder="e.g. Radisson Blu Hotel, Kharadi, Pune" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Assigned Team / Crew Members</span>
+              <span style="font-size: 11px; color: #38bdf8; font-weight: normal;">Click names to select</span>
+            </label>
+            <input type="text" id="brf-team" class="form-control" placeholder="Click team members below to assign" oninput="renderCrewChips('brf-crew-chips', 'brf-team')">
+            <div class="crew-chips-container" id="brf-crew-chips"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Shoot Status</label>
+          <select id="brf-status" class="form-control">
+            <option value="Active" selected>🟢 Active</option>
+            <option value="Scheduled">🟡 Scheduled</option>
+            <option value="In Progress">🔵 In Progress</option>
+            <option value="Wrapped">🟣 Wrapped</option>
+            <option value="Post-Production">🟠 Post-Production</option>
+            <option value="Completed">✅ Completed</option>
+            <option value="Postponed">⏸️ Postponed</option>
+            <option value="Cancelled">❌ Cancelled</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>📦 Equipment for Shoot</span>
+            <span style="font-size: 11px; color: #38bdf8; font-weight: normal;">Click gear below to select</span>
+          </label>
+          <input type="text" id="brf-equipment" class="form-control" placeholder="Select gear below or type equipment items" oninput="renderEquipmentChips('brf-equipment-chips', 'brf-equipment')">
+          <div class="equip-chips-container" id="brf-equipment-chips"></div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-brief')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Shoot to Tracker & Excel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: Edit Shoot in Shoot Tracker (Same-Day Window) -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="modal-edit-brief">
+    <div class="modal-content" style="max-width: 720px;">
+      <div class="modal-header">
+        <div class="modal-title">✏️ Edit Shoot Details (Shoot Tracker)</div>
+        <button class="close-btn" onclick="closeModal('modal-edit-brief')">&times;</button>
+      </div>
+
+      <div style="background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.25); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 12px; color: #38bdf8; display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 16px;">⏱️</span>
+        <div><strong>Same-Day Edit Policy:</strong> Edits are accepted on the same day of entry. Previous-day records are locked for audit integrity.</div>
+      </div>
+
+      <form onsubmit="submitEditBrief(event)">
+        <input type="hidden" id="edit-brf-id">
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Project Name *</label>
+            <input type="text" id="edit-brf-project" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Client Name *</label>
+            <input type="text" id="edit-brf-client" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Client Contact Person & Phone</label>
+            <input type="text" id="edit-brf-contact-person" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Deliverables / Scope *</label>
+            <input type="text" id="edit-brf-deliverables" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Shoot Date *</label>
+            <input type="text" id="edit-brf-date" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Shoot End Date</label>
+            <input type="text" id="edit-brf-end-date" class="form-control" placeholder="Leave blank = same as shoot date">
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Crew Call / Reach Time *</label>
+            <input type="text" id="edit-brf-call" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <!-- spacer -->
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Shoot Location *</label>
+            <input type="text" id="edit-brf-location" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Assigned Team / Crew Members</span>
+              <span style="font-size: 11px; color: #38bdf8; font-weight: normal;">Click names to select</span>
+            </label>
+            <input type="text" id="edit-brf-team" class="form-control" placeholder="Click team members below to assign" oninput="renderCrewChips('edit-brf-crew-chips', 'edit-brf-team')">
+            <div class="crew-chips-container" id="edit-brf-crew-chips"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Shoot Status</label>
+          <select id="edit-brf-status" class="form-control">
+            <option value="Active">🟢 Active</option>
+            <option value="Scheduled">🟡 Scheduled</option>
+            <option value="In Progress">🔵 In Progress</option>
+            <option value="Wrapped">🟣 Wrapped</option>
+            <option value="Post-Production">🟠 Post-Production</option>
+            <option value="Completed">✅ Completed</option>
+            <option value="Postponed">⏸️ Postponed</option>
+            <option value="Cancelled">❌ Cancelled</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>📦 Equipment for Shoot</span>
+            <span style="font-size: 11px; color: #38bdf8; font-weight: normal;">Click gear below to select</span>
+          </label>
+          <input type="text" id="edit-brf-equipment" class="form-control" placeholder="Select gear below or type equipment items" oninput="renderEquipmentChips('edit-brf-equipment-chips', 'edit-brf-equipment')">
+          <div class="equip-chips-container" id="edit-brf-equipment-chips"></div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-edit-brief')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Shoot in Tracker & Excel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: Custom Shoot Status Editor -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="modal-custom-status">
+    <div class="modal-content" style="max-width: 540px;">
+      <div class="modal-header">
+        <div class="modal-title">🎯 Edit Shoot Status</div>
+        <button class="close-btn" onclick="closeModal('modal-custom-status')">&times;</button>
+      </div>
+
+      <form onsubmit="submitCustomStatusModal(event)">
+        <input type="hidden" id="custom-status-shoot-id">
+
+        <div style="background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.25); border-radius: 8px; padding: 12px 14px; margin-bottom: 16px;">
+          <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Shoot Reference & Project</div>
+          <div id="custom-status-shoot-info" style="font-weight: 700; color: #f1f5f9; font-size: 14px; margin-top: 2px;"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Quick Presets / Custom Milestones:</label>
+          <div class="chips-row" style="margin-bottom: 12px; gap: 6px;">
+            <button type="button" class="chip-btn" onclick="setCustomStatusInput('Active')">🟢 Active</button>
+            <button type="button" class="chip-btn" onclick="setCustomStatusInput('Scheduled')">🟡 Scheduled</button>
+            <button type="button" class="chip-btn" onclick="setCustomStatusInput('In Progress')">🔵 In Progress</button>
+            <button type="button" class="chip-btn" onclick="setCustomStatusInput('Wrapped')">🟣 Wrapped</button>
+            <button type="button" class="chip-btn" onclick="setCustomStatusInput('Post-Production')">🟠 Post-Production</button>
+            <button type="button" class="chip-btn" onclick="setCustomStatusInput('Completed')">✅ Completed</button>
+            <button type="button" class="chip-btn" onclick="setCustomStatusInput('Client Review')">👀 Client Review</button>
+            <button type="button" class="chip-btn" onclick="setCustomStatusInput('Raw Footage Sent')">📦 Footage Sent</button>
+            <button type="button" class="chip-btn" onclick="setCustomStatusInput('Payment Pending')">💳 Payment Pending</button>
+            <button type="button" class="chip-btn" onclick="setCustomStatusInput('Postponed')">⏸️ Postponed</button>
+            <button type="button" class="chip-btn" onclick="setCustomStatusInput('Cancelled')">❌ Cancelled</button>
+          </div>
+          <label class="form-label">Custom Status Text:</label>
+          <input type="text" id="custom-status-input" class="form-control" placeholder="Type ANY status (e.g. Color Grading / In Studio / Client Approval)" required>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-custom-status')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Status & Sync Excel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: Log Petty Cash / Expense (WITH SCREENSHOT / RECEIPT ATTACHER) -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="modal-expense">
+    <div class="modal-content" style="max-width: 650px;">
+      <div class="modal-header">
+        <div class="modal-title">💰 Log Production Expense & Attach Bill / Screenshot</div>
+        <button class="close-btn" onclick="closeModal('modal-expense')">&times;</button>
+      </div>
+      <form onsubmit="submitExpense(event)">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Project Name *</label>
+            <input type="text" id="exp-project" class="form-control" placeholder="Enter project name" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" id="exp-date" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <select id="exp-category" class="form-control">
+              <option value="Food & Catering">Food & Catering</option>
+              <option value="Transport & Fuel">Transport & Fuel</option>
+              <option value="Location & Permits">Location & Permits</option>
+              <option value="Art & Props">Art & Props</option>
+              <option value="Equipment Rentals">Equipment Rentals</option>
+              <option value="Miscellaneous">Miscellaneous</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount (INR) *</label>
+            <input type="number" step="0.01" id="exp-amount" class="form-control" placeholder="Enter amount" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Expense Description *</label>
+          <input type="text" id="exp-desc" class="form-control" placeholder="Enter description (e.g. Catering, Fuel, Props)" required>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Paid By</label>
+            <input type="text" id="exp-paid-by" class="form-control" value="Saurabh Patil (PM)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Mode</label>
+            <select id="exp-mode" class="form-control">
+              <option value="UPI / GPay">UPI / GPay</option>
+              <option value="Cash">Cash</option>
+              <option value="Company Card">Company Card</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Receipt / Screenshot Attacher -->
+        <div class="form-group">
+          <label class="form-label">📎 Attach Receipt Image / Paste Screenshot (Ctrl + V):</label>
+          <div class="receipt-dropzone" id="exp-dropzone" onclick="document.getElementById('exp-file-input').click()">
+            <div style="font-size: 24px; margin-bottom: 6px;">📷</div>
+            <div style="font-size: 13px; font-weight: 600; color: #38bdf8;">Click to Upload Receipt or Paste Screenshot directly (Ctrl+V)</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Supports JPG, PNG, WEBP receipts & payment slips</div>
+            <input type="file" id="exp-file-input" accept="image/*" style="display: none;" onchange="handleReceiptFileSelect(event)">
+            <img id="exp-preview-img" class="dropzone-preview" alt="Receipt Preview">
+          </div>
+          <input type="hidden" id="exp-receipt-url">
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-expense')">Cancel</button>
+          <button type="submit" class="btn btn-accent">Save Expense & Attach Bill</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: Lightbox Viewer for Receipts -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="modal-lightbox">
+    <div class="modal-content" style="max-width: 700px; text-align: center;">
+      <div class="modal-header">
+        <div class="modal-title" id="lightbox-title">📷 Receipt / Bill Attachment</div>
+        <button class="close-btn" onclick="closeModal('modal-lightbox')">&times;</button>
+      </div>
+      <div style="padding: 10px;">
+        <img id="lightbox-img" src="" alt="Full Receipt" style="max-width: 100%; max-height: 70vh; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+      </div>
+      <div class="form-actions" style="justify-content: center; margin-top: 14px;">
+        <a id="lightbox-download-link" href="#" download="receipt.jpg" class="btn btn-primary">📥 Download Original Receipt</a>
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-lightbox')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: Add New Single Item -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="modal-add-item">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">🎥 Add New Gear Item to Inventory</div>
+        <button class="close-btn" onclick="closeModal('modal-add-item')">&times;</button>
+      </div>
+      <form onsubmit="submitAddItem(event)">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <select id="item-category" class="form-control" required>
+              <option value="Camera">Camera</option>
+              <option value="Lens">Lens</option>
+              <option value="Lighting">Lighting</option>
+              <option value="Audio">Audio</option>
+              <option value="Grip">Grip & Tripod</option>
+              <option value="Monitoring">Monitoring</option>
+              <option value="Power">Power & Battery</option>
+              <option value="Media">Media & Storage</option>
+              <option value="Accessories">Accessories</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Item ID (Optional, auto-generated)</label>
+            <input type="text" id="item-id" class="form-control" placeholder="e.g. CAM-01">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Item Name *</label>
+          <input type="text" id="item-name" class="form-control" placeholder="Enter equipment name" required>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Brand & Model</label>
+            <input type="text" id="item-model" class="form-control" placeholder="Enter model">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Serial Number</label>
+            <input type="text" id="item-serial" class="form-control" placeholder="Enter serial number">
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Default Vault Location</label>
+            <input type="text" id="item-location" class="form-control" placeholder="e.g. Vault A">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Quantity</label>
+            <input type="number" id="item-qty" class="form-control" value="1" min="1">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Kit Notes & Inclusions</label>
+          <input type="text" id="item-notes" class="form-control" placeholder="Enter accessories included">
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-add-item')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Item & Update Master Sheet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: Import Gear List (CSV) -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="modal-import">
+    <div class="modal-content" style="max-width: 680px;">
+      <div class="modal-header">
+        <div class="modal-title">📁 Import Equipment List (CSV)</div>
+        <button class="close-btn" onclick="closeModal('modal-import')">&times;</button>
+      </div>
+      <form onsubmit="submitImport(event)">
+        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 14px; line-height: 1.5;">
+          Paste your CSV equipment data here. It will update your inventory and recreate the Excel Master Sheet!
+        </p>
+
+        <div class="form-group">
+          <label class="form-label">Import Mode:</label>
+          <div style="display: flex; gap: 20px; font-size: 13px; margin-bottom: 8px;">
+            <label><input type="radio" name="import-mode" value="replace" checked> <strong>Replace Entire Inventory</strong> (Fresh upload)</label>
+            <label><input type="radio" name="import-mode" value="append"> <strong>Append to Existing</strong></label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Paste CSV Content:</label>
+          <textarea id="import-csv-text" class="form-control" rows="8" placeholder="Item ID,Category,Item Name,Brand & Model,Serial Number,Default Kit Location,Total Qty,Status,Condition / Notes"></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 14px;">
+          <div class="form-actions" style="margin-top: 0;">
+            <button type="button" class="btn btn-outline" onclick="closeModal('modal-import')">Cancel</button>
+            <button type="submit" class="btn btn-accent">Import Gear List Now</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 850" width="100%" height="100%">
+  <!-- Stylized LP Monogram -->
+  <g fill="currentColor" transform="translate(100, 30)">
+    <!-- Outer LP Shape with Chamfer and Cutouts -->
+    <path fill-rule="evenodd" d="
+      M 40,0 
+      L 140,0 
+      L 140,240 
+      L 240,340 
+      L 240,140 
+      L 340,40 
+      L 540,40 
+      L 540,240 
+      L 440,240 
+      L 440,340 
+      L 340,340 
+      L 340,540 
+      L 240,540 
+      L 240,440 
+      L 140,340 
+      L 40,240 
+      Z
+      
+      M 340,140 
+      L 440,140 
+      L 440,240 
+      L 340,240 
+      Z
+    " />
+  </g>
+
+  <!-- Typography -->
+  <g fill="currentColor" text-anchor="middle" font-family="'Inter', 'Montserrat', 'Segoe UI', sans-serif">
+    <text x="400" y="680" font-size="62" font-weight="900" letter-spacing="14">LIGHTPAPER</text>
+    <text x="400" y="745" font-size="34" font-weight="600" letter-spacing="22">CREATIONS</text>
+  </g>
+</svg>
